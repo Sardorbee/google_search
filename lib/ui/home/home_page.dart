@@ -3,6 +3,7 @@ import 'package:google_search/data/models/main_search_model.dart';
 import 'package:google_search/data/models/organic.dart';
 import 'package:google_search/data/models/universaldata.dart';
 import 'package:google_search/data/network/api/api.dart';
+import 'package:google_search/ui/home/widgets/lastEx.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class HomePage extends StatefulWidget {
@@ -45,7 +46,7 @@ class _HomePageState extends State<HomePage> {
 
   _saveSearchHistory() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    if (!searchSuggestions.contains(queryText)) {
+    if (!searchSuggestions.contains(queryText) && queryText.isNotEmpty) {
       searchSuggestions.insert(0, queryText);
       if (searchSuggestions.length > 5) {
         searchSuggestions.removeLast();
@@ -136,95 +137,17 @@ class _HomePageState extends State<HomePage> {
               ),
             ),
           ),
-          Expanded(
-            child: ListView.builder(
-              controller: scrollController,
-              itemCount: organicModels.length + 1,
-              itemBuilder: (context, index) {
-                if (index < organicModels.length) {
-                  OrganicModel organicModel = organicModels[index];
-                  return Container(
-                    margin: const EdgeInsets.all(16),
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.grey.withOpacity(0.2),
-                          spreadRadius: 2,
-                          blurRadius: 5,
-                          offset: const Offset(0, 3),
-                        ),
-                      ],
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          organicModel.title,
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 18,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          organicModel.snippet,
-                          style: const TextStyle(fontSize: 16),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          organicModel.link,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(color: Colors.blue),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          organicModel.date,
-                          style: const TextStyle(color: Colors.grey),
-                        ),
-                      ],
-                    ),
-                  );
-                } else if (isLoading) {
-                  return const Center(child: CircularProgressIndicator());
-                } else if (organicModels.isEmpty) {
-                  return Column(
-                    children: [
-                      for (String suggestion in searchSuggestions)
-                        ListTile(
-                          onTap: () {
-                            setState(() {
-                              queryText = suggestion;
-                            });
-                            queryController.text = suggestion;
-                            organicModels.clear();
-                            pagee = 1;
-                            _fetchResult();
-                          },
-                          title: Text(suggestion),
-                          leading: const Icon(Icons.search),
-                        ),
-                      // if (searchSuggestions.isNotEmpty)
-                      ElevatedButton(
-                        onPressed: () {
-                          setState(() {
-                            organicModels.clear();
-                            pagee = 1;
-                          });
-                          _saveSearchHistory();
-                          _fetchResult();
-                        },
-                        child: const Text("Search"),
-                      ),
-                    ],
-                  );
-                }
-              },
-            ),
-          ),
+          LastEx(
+            fetchresult: _fetchResult,
+            isLoading: isLoading,
+            organicModels: organicModels,
+            pagee: pagecounte,
+            queryController: queryController,
+            queryText: queryText,
+            saveSearchHistory: _saveSearchHistory,
+            scrollController: scrollController,
+            searchSuggestions: searchSuggestions,
+          )
         ],
       ),
     );
