@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_search/data/models/organic.dart';
 
+// ignore: must_be_immutable
 class LastEx extends StatefulWidget {
   var scrollController;
 
